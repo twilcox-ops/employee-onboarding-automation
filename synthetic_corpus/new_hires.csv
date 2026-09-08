@@ -1,0 +1,101 @@
+Request ID,Employee ID,First Name,Last Name,Department,Job Role,Manager,Employment Type,Start Date,Corporate Card Required,Ready for Onboarding,HR Ready Date
+ONB-1001,EMP-3001,Alex,Carter,Finance,Financial Analyst,Dana Mitchell,Regular Full-Time,2026-09-17,No,Yes,2026-09-11
+ONB-1002,EMP-3002,Jordan,Brooks,Human Resources,HR Generalist,Leslie Grant,Regular Full-Time,2026-09-21,No,Yes,2026-09-14
+ONB-1003,EMP-3003,Taylor,Bailey,Information Technology,Service Desk Analyst,Chris Nolan,Regular Full-Time,2026-09-23,No,Yes,2026-09-15
+ONB-1004,EMP-3004,Morgan,Bennett,Operations,Operations Coordinator,Robin Shaw,Regular Full-Time,2026-09-28,No,Yes,2026-09-19
+ONB-1005,EMP-3005,Casey,Powell,Sales,Account Executive,Pat Monroe,Regular Full-Time,2026-09-29,No,Yes,2026-09-19
+ONB-1006,EMP-3006,Riley,Cooper,Marketing,Marketing Specialist,Sam Rivera,Regular Full-Time,2026-09-08,No,Yes,2026-09-01
+ONB-1007,EMP-3007,Avery,Hayes,Finance,Staff Accountant,Dana Mitchell,Regular Full-Time,2026-10-05,Yes,Yes,2026-09-23
+ONB-1008,EMP-3008,Cameron,Ward,Human Resources,Recruiter,Leslie Grant,Contractor,2026-10-08,No,Yes,2026-09-25
+ONB-1009,EMP-3009,Parker,Richardson,Information Technology,Systems Administrator,Chris Nolan,Regular Full-Time,2026-10-12,No,Yes,2026-09-28
+ONB-1010,EMP-3010,Quinn,Morgan,Operations,Project Coordinator,Robin Shaw,Regular Full-Time,2026-10-14,No,Yes,2026-10-09
+ONB-1011,EMP-3011,Reese,Price,Sales,Sales Operations Analyst,Pat Monroe,Regular Full-Time,2026-10-19,No,Yes,2026-10-13
+ONB-1012,EMP-3012,Drew,Bell,Research,Research Analyst,Sam Rivera,Regular Full-Time,2026-10-20,No,Yes,2026-10-13
+ONB-1013,EMP-3013,Skyler,Reed,Finance,Payroll Specialist,Dana Mitchell,Regular Full-Time,2026-10-23,No,Yes,2026-10-15
+ONB-1014,EMP-3014,Hayden,Gray,Human Resources,Benefits Specialist,Leslie Grant,Regular Full-Time,2026-10-26,Yes,Yes,2026-10-17
+ONB-1015,EMP-3015,Emerson,Murphy,Information Technology,Automation Engineer,Chris Nolan,Regular Full-Time,2026-10-29,,Yes,2026-10-19
+ONB-1016,EMP-3016,Finley,Foster,Operations,Operations Analyst,Robin Shaw,Regular Full-Time,2026-11-02,No,Yes,2026-10-22
+ONB-1017,EMP-3017,Rowan,Coleman,Sales,Business Development Representative,Pat Monroe,Regular Full-Time,2026-11-04,No,Yes,2026-10-23
+ONB-1018,EMP-3018,Blake,Kelly,Marketing,Marketing Analyst,Sam Rivera,Regular Full-Time,2026-11-09,No,Yes,2026-10-27
+ONB-1019,EMP-3019,Dakota,Perry,Finance,Financial Analyst,Dana Mitchell,Intern,2026-11-10,No,Yes,2026-10-27
+ONB-1020,EMP-3020,Jamie,Ross,Human Resources,HR Generalist,Leslie Grant,Regular Full-Time,2026-11-13,No,Yes,2026-11-08
+ONB-1021,EMP-3021,Alex,Carter,Information Technology,Service Desk Analyst,Chris Nolan,Regular Full-Time,2026-11-16,Yes,Yes,2026-11-10
+ONB-1022,EMP-3022,Jordan,Brooks,Operations,Operations Coordinator,Robin Shaw,Regular Full-Time,2026-11-19,No,Yes,2026-11-12
+ONB-1023,EMP-3023,Taylor,Bailey,Sales,Account Executive,Pat Monroe,Regular Full-Time,2026-11-23,No,Yes,2026-11-15
+ONB-1024,EMP-3024,Morgan,Bennett,Marketing,Marketing Specialist,Sam Rivera,Regular Full-Time,2026-11-25,No,Yes,2026-11-16
+ONB-1025,EMP-3025,Casey,Powell,Finance,Staff Accountant,Dana Mitchell,Regular Full-Time,2026-11-30,No,Yes,2026-11-20
+ONB-1026,EMP-3026,Riley,Cooper,Human Resources,Recruiter,Leslie Grant,Regular Full-Time,2026-12-01,No,Yes,2026-11-20
+ONB-1027,EMP-3027,Avery,Hayes,Information Technology,Systems Administrator,Chris Nolan,Regular Full-Time,2026-12-04,No,Yes,2026-11-22
+ONB-1028,EMP-3004,Morgan,Bennett,Operations,Operations Coordinator,Robin Shaw,Regular Full-Time,2026-09-28,No,Yes,2026-09-19
+ONB-1029,EMP-3029,Parker,Richardson,Sales,Sales Operations Analyst,Pat Monroe,Regular Full-Time,2026-12-10,No,Yes,2026-11-26
+ONB-1030,EMP-3030,Quinn,Morgan,Marketing,Content Specialist,Sam Rivera,Regular Full-Time,2026-12-14,No,Yes,2026-12-09
+ONB-1031,EMP-3031,Reese,Price,Finance,Payroll Specialist,Dana Mitchell,Regular Full-Time,2026-12-16,No,Yes,2026-12-10
+ONB-1032,EMP-3032,Drew,Bell,Human Resources,Benefits Specialist,Leslie Grant,Regular Full-Time,2026-12-21,No,Yes,2026-12-21
+ONB-1033,EMP-3033,Skyler,Reed,Information Technology,Automation Engineer,Chris Nolan,Regular Full-Time,2026-12-22,No,Yes,2026-12-14
+ONB-1034,EMP-3034,Hayden,Gray,Operations,Operations Analyst,Robin Shaw,Regular Full-Time,2026-12-25,No,Yes,2026-12-16
+ONB-1035,EMP-3035,Emerson,Murphy,Sales,Business Development Representative,Pat Monroe,Regular Full-Time,2026-12-28,Yes,Yes,2026-12-18
+ONB-1036,EMP-3036,Finley,Foster,Marketing,Marketing Analyst,Sam Rivera,Regular Full-Time,2026-12-31,No,Yes,2026-12-20
+ONB-1037,EMP-3037,Rowan,Coleman,Finance,Finance Systems Specialist,Dana Mitchell,Regular Full-Time,2027-01-04,No,Yes,2026-12-23
+ONB-1038,EMP-3038,Blake,Kelly,Human Resources,HR Generalist,Leslie Grant,Regular Full-Time,2027-01-06,No,Yes,2026-12-24
+ONB-1039,EMP-3039,Dakota,Perry,Information Technology,Service Desk Analyst,Chris Nolan,Regular Full-Time,2027-01-11,No,Yes,2026-12-28
+ONB-1040,EMP-3040,Jamie,Ross,Operations,Operations Coordinator,Robin Shaw,Regular Full-Time,2026-09-14,No,Yes,2026-09-09
+ONB-1041,EMP-3041,Alex,Carter,Sales,Account Executive,Pat Monroe,Regular Full-Time,2026-09-17,No,Yes,2026-09-11
+ONB-1042,EMP-3042,Jordan,Brooks,Marketing,Marketing Specialist,Sam Rivera,Regular Full-Time,2026-09-21,Yes,Yes,2026-09-14
+ONB-1043,EMP-3043,Taylor,Bailey,Finance,Staff Accountant,Dana Mitchell,Regular Full-Time,2026-09-23,No,Yes,2026-09-15
+ONB-1044,EMP-3044,Morgan,Bennett,Human Resources,Recruiter,Leslie Grant,Regular Full-Time,2026-09-28,No,Yes,2026-09-19
+ONB-1045,EMP-3045,Casey,Powell,Information Technology,Systems Administrator,Chris Nolan,Temporary Worker,2026-09-29,No,Yes,2026-09-19
+ONB-1046,EMP-3046,Riley,Cooper,Operations,Project Coordinator,Robin Shaw,Regular Full-Time,2026-10-02,No,Yes,2026-09-21
+ONB-1047,EMP-3047,Avery,Hayes,Sales,Sales Operations Analyst,Pat Monroe,Regular Full-Time,2026-10-05,No,Yes,2026-09-23
+ONB-1048,EMP-3048,Cameron,Ward,Marketing,Content Specialist,Sam Rivera,Regular Full-Time,2026-10-08,No,Yes,2026-09-25
+ONB-1049,EMP-3049,Parker,Richardson,Finance,Payroll Specialist,Dana Mitchell,Regular Full-Time,2026-10-12,Yes,Yes,2026-09-28
+ONB-1050,EMP-3050,Quinn,Morgan,Human Resources,Benefits Specialist,Leslie Grant,Regular Full-Time,2026-11-30,No,Yes,2026-11-23
+ONB-1051,EMP-3051,Reese,Price,Information Technology,Automation Engineer,Chris Nolan,Regular Full-Time,2026-10-19,No,Yes,2026-10-13
+ONB-1052,EMP-3052,Drew,Bell,Operations,Operations Analyst,Robin Shaw,Regular Full-Time,2026-10-20,No,Yes,2026-10-13
+ONB-1053,EMP-3053,Skyler,Reed,Sales,Business Development Representative,Pat Monroe,Regular Full-Time,2026-10-23,Pending,Yes,2026-10-15
+ONB-1054,EMP-3054,Hayden,Gray,Marketing,Marketing Analyst,Sam Rivera,Regular Full-Time,2026-10-26,No,Yes,2026-10-17
+ONB-1055,EMP-3055,Emerson,Murphy,Finance,Financial Analyst,Dana Mitchell,Regular Full-Time,2026-10-29,No,Yes,2026-10-19
+ONB-1056,EMP-3056,Finley,Foster,Human Resources,HR Generalist,Leslie Grant,Regular Full-Time,2026-11-02,Yes,Yes,2026-10-22
+ONB-1057,EMP-3057,Rowan,Coleman,Information Technology,Service Desk Analyst,Chris Nolan,Regular Full-Time,2026-11-04,No,Yes,2026-10-23
+ONB-1058,EMP-3058,Blake,Kelly,Operations,Operations Coordinator,Robin Shaw,Regular Full-Time,2026-11-09,No,Yes,2026-10-27
+ONB-1059,EMP-3059,Dakota,Perry,Sales,Account Executive,Pat Monroe,Regular Full-Time,2026-11-10,No,Yes,2026-10-27
+ONB-1060,EMP-3060,Jamie,Ross,Marketing,Marketing Specialist,Sam Rivera,Regular Full-Time,2026-11-13,No,Yes,2026-11-08
+ONB-1061,EMP-3061,Alex,Carter,Finance,Staff Accountant,Dana Mitchell,Regular Full-Time,2026-11-16,No,Yes,2026-11-10
+ONB-1062,EMP-3062,Jordan,Brooks,Human Resources,Recruiter,Leslie Grant,Regular Full-Time,2026-11-19,No,Yes,2026-11-20
+ONB-1063,EMP-3063,Taylor,Bailey,Information Technology,Systems Administrator,Chris Nolan,Regular Full-Time,2026-11-23,Yes,Yes,2026-11-15
+ONB-1064,EMP-3064,Morgan,Bennett,Operations,Project Coordinator,Robin Shaw,Regular Full-Time,2026-11-25,No,Yes,2026-11-16
+ONB-1065,EMP-3065,Casey,Powell,Sales,Sales Operations Analyst,Pat Monroe,Regular Full-Time,2026-11-30,No,Yes,2026-11-20
+ONB-1066,EMP-3066,Riley,Cooper,Marketing,Content Specialist,Sam Rivera,Regular Full-Time,2026-12-01,No,Yes,2026-11-20
+ONB-1067,EMP-3067,Avery,Hayes,Finance,Payroll Specialist,Dana Mitchell,Regular Full-Time,2026-12-04,No,Yes,2026-11-22
+ONB-1068,EMP-3023,Taylor,Bailey,Sales,Account Executive,Pat Monroe,Regular Full-Time,2026-11-23,No,Yes,2026-11-15
+ONB-1069,EMP-3069,Parker,Richardson,Information Technology,Automation Engineer,Chris Nolan,Regular Full-Time,2026-12-10,No,Yes,2026-11-26
+ONB-1070,EMP-3070,Quinn,Morgan,Operations,Operations Analyst,Robin Shaw,Regular Full-Time,2026-12-14,Yes,Yes,2026-12-09
+ONB-1071,EMP-3071,Reese,Price,Sales,Business Development Representative,Pat Monroe,Regular Full-Time,2026-12-16,No,Yes,2026-12-10
+ONB-1072,EMP-3072,Drew,Bell,Marketing,Marketing Analyst,Sam Rivera,Regular Full-Time,2026-12-21,No,Yes,2026-12-14
+ONB-1073,EMP-3073,Skyler,Reed,Finance,Financial Analyst,Dana Mitchell,Regular Full-Time,2026-12-22,No,Yes,2026-12-14
+ONB-1074,EMP-3074,Hayden,Gray,Human Resources,HR Generalist,Leslie Grant,Rehire,2026-12-25,No,Yes,2026-12-16
+ONB-1075,EMP-3075,Emerson,Murphy,Information Technology,Service Desk Analyst,Chris Nolan,Regular Full-Time,2026-12-28,No,Yes,2026-12-18
+ONB-1076,EMP-3076,Finley,Foster,Operations,Operations Coordinator,Robin Shaw,Regular Full-Time,2026-12-31,No,Yes,2026-12-20
+ONB-1077,EMP-3077,Rowan,Coleman,Sales,Account Executive,Pat Monroe,Regular Full-Time,2026-12-28,Yes,Yes,2026-12-21
+ONB-1078,EMP-3078,Blake,Kelly,Marketing,Marketing Specialist,Sam Rivera,Regular Full-Time,2027-01-06,No,Yes,2026-12-24
+ONB-1079,EMP-3079,Dakota,Perry,Finance,Staff Accountant,Dana Mitchell,Regular Full-Time,2027-01-11,No,Yes,2026-12-28
+ONB-1080,EMP-3080,Jamie,Ross,Human Resources,Recruiter,Leslie Grant,Regular Full-Time,2026-09-14,No,Yes,2026-09-09
+ONB-1081,EMP-3081,Alex,Carter,Information Technology,Systems Administrator,Chris Nolan,Regular Full-Time,2026-09-17,No,Yes,2026-09-11
+ONB-1082,EMP-3082,Jordan,Brooks,Legal,Paralegal,Robin Shaw,Regular Full-Time,2026-09-21,No,Yes,2026-09-14
+ONB-1083,EMP-3083,Taylor,Bailey,Sales,Sales Operations Analyst,Pat Monroe,Regular Full-Time,2026-09-23,No,Yes,2026-09-15
+ONB-1084,EMP-3084,Morgan,Bennett,Marketing,Content Specialist,Sam Rivera,Regular Full-Time,2026-09-28,Yes,Yes,2026-09-19
+ONB-1085,EMP-3085,Casey,Powell,Finance,Payroll Specialist,Dana Mitchell,Regular Full-Time,2026-09-29,No,Yes,2026-09-19
+ONB-1086,EMP-3086,Riley,Cooper,Human Resources,Benefits Specialist,Leslie Grant,Regular Full-Time,2026-10-02,No,Yes,2026-09-21
+ONB-1087,EMP-3087,Avery,Hayes,Information Technology,Automation Engineer,Chris Nolan,Regular Full-Time,2026-10-05,No,Yes,2026-09-23
+ONB-1088,EMP-3088,Cameron,Ward,Operations,Operations Analyst,Robin Shaw,Regular Full-Time,2026-10-08,No,Yes,2026-09-25
+ONB-1089,EMP-3089,Parker,Richardson,Sales,Business Development Representative,Pat Monroe,Regular Full-Time,2026-10-12,Y,Yes,2026-09-28
+ONB-1090,EMP-3090,Quinn,Morgan,Marketing,Marketing Analyst,Sam Rivera,Regular Full-Time,2026-10-14,No,Yes,2026-10-09
+ONB-1091,EMP-3091,Reese,Price,Finance,Financial Analyst,Dana Mitchell,Regular Full-Time,2026-10-19,Yes,Yes,2026-10-13
+ONB-1092,EMP-3092,Drew,Bell,Human Resources,HR Generalist,Leslie Grant,Regular Full-Time,2026-10-20,No,Yes,2026-10-13
+ONB-1093,EMP-3093,Skyler,Reed,Information Technology,Service Desk Analyst,Chris Nolan,Regular Full-Time,2027-01-04,No,Yes,2026-12-28
+ONB-1094,EMP-3094,Hayden,Gray,Operations,Operations Coordinator,Robin Shaw,Regular Full-Time,2026-10-26,No,Yes,2026-10-17
+ONB-1095,EMP-3095,Emerson,Murphy,Sales,Account Executive,Pat Monroe,Regular Full-Time,2026-10-29,No,Yes,2026-10-19
+ONB-1096,EMP-3041,Alex,Carter,Sales,Account Executive,Pat Monroe,Regular Full-Time,2026-09-17,No,Yes,2026-09-11
+ONB-1097,EMP-3097,Rowan,Coleman,Finance,Staff Accountant,Dana Mitchell,Regular Full-Time,2026-11-04,No,Yes,2026-10-23
+ONB-1098,EMP-3098,Blake,Kelly,Human Resources,Recruiter,Leslie Grant,Regular Full-Time,2026-11-09,Yes,Yes,2026-10-27
+ONB-1099,EMP-3099,Dakota,Perry,Information Technology,Systems Administrator,Chris Nolan,Regular Full-Time,2026-11-10,No,Yes,2026-10-27
+ONB-1100,EMP-3100,Jamie,Ross,Operations,Project Coordinator,Robin Shaw,Regular Full-Time,2026-11-13,No,Yes,2026-11-08
