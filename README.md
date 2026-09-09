@@ -7,16 +7,18 @@ summarizes what's actually built.
 
 ## Status
 
-Phases 1–3 are implemented, tested, and committed. Nothing beyond that exists yet.
+Phases 1–5 are implemented, tested, and committed. Nothing beyond that exists yet.
 
 | Phase | Covers | Status |
 |---|---|---|
 | 1 | Load and validate the three source files | Done |
 | 2 | Business decisions (scope, scheduling, group mapping, corporate-card validation, duplicates) | Done |
 | 3 | Entra ID account step, against a simulated directory | Done |
-| 4+ | Licensing, group assignment, corporate card setup, manager notification, orchestration, audit logging | Not started |
+| 4 | Microsoft 365 E3 licensing, against a simulated service | Done |
+| 5 | Standard group assignment, against a simulated service | Done |
+| 6+ | Corporate card setup, manager notification, orchestration, audit logging | Not started |
 
-31 automated tests pass. Phases 2 and 3 were also spot-checked by hand against
+47 automated tests pass. Phases 2–5 were also spot-checked by hand against
 `REQUIREMENTS.md` and `synthetic_corpus/`.
 
 ## Phase 1 — Load and validate
@@ -65,14 +67,24 @@ For a given request, the step produces one of:
 Not wired into scope/duplicate checks or any other orchestration yet — it
 only runs when called directly.
 
+## Phase 4–5 — Licensing and group assignment
+
+Same shape as Phase 3: `licensing.py` and `groups.py` assign Microsoft 365 E3
+and the standard groups (from the Phase 2 mapping) against simulated
+in-memory services. Both recognize existing state instead of reassigning,
+verify the result rather than trusting the write, and route anything
+nonstandard — an unrecognized existing license, an unmapped role, a
+membership that doesn't verify — to manual review or failure instead of
+guessing. Neither is wired into orchestration yet.
+
 ## Not implemented
 
-Beyond Phases 1–3: licensing (M365 E3), group and corporate-card setup,
-manager lookup/notification, real Entra/Graph integration, rerun handling
-beyond Phase 3's own step, audit logging, cross-phase orchestration,
-Docker/deployment, and any HR data source beyond the static CSV/XLSX files
-in `synthetic_corpus/`. Contractors, interns, temps, rehires, and transfers
-are explicitly out of scope per REQUIREMENTS.md.
+Beyond Phases 1–5: corporate-card setup, manager lookup/notification, real
+Entra/Graph and M365 integration, rerun handling beyond each step's own
+logic, audit logging, cross-phase orchestration, Docker/deployment, and any
+HR data source beyond the static CSV/XLSX files in `synthetic_corpus/`.
+Contractors, interns, temps, rehires, and transfers are explicitly out of
+scope per REQUIREMENTS.md.
 
 ## Repo layout
 
@@ -80,6 +92,8 @@ are explicitly out of scope per REQUIREMENTS.md.
 REQUIREMENTS.md    Authoritative business requirements
 onboarding.py       Phase 1 (load) + Phase 2 (decisions)
 entra.py             Phase 3 (Entra account step + simulated directory)
+licensing.py         Phase 4 (E3 licensing step + simulated service)
+groups.py            Phase 5 (group assignment step + simulated service)
 run.py               Runs Phases 1-2, prints a summary
 tests/                pytest suite
 synthetic_corpus/     Fictional HR data used for development and testing
@@ -93,8 +107,9 @@ pytest                # run the test suite
 python run.py          # Phases 1-2 summary
 ```
 
-`run.py` doesn't exercise Phase 3 yet — the Entra step is only called
-directly (see `tests/test_entra.py`).
+`run.py` doesn't exercise Phases 3–5 yet — those steps are only called
+directly (see `tests/test_entra.py`, `tests/test_licensing.py`,
+`tests/test_groups.py`).
 
 ## Data
 
