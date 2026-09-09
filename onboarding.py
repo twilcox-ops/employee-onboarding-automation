@@ -1,12 +1,10 @@
 """Employee Onboarding Automation.
 
 Stage 1: load and validate the three synthetic_corpus/ input files.
-
-Only structural loading lives here — parsing each file into a usable shape
-and reporting rows/fields that can't be read as given (e.g. an unparseable
-date, a blank required cell). Business decisions such as scope filtering,
-duplicate detection, unmapped-group handling, or corporate-card validity
-are NOT made here — those are later stages, per REQUIREMENTS.md.
+Stage 2: business decisions that can be made from that loaded data alone —
+scope, scheduling, group mapping, corporate-card validation, and duplicate
+handling. Nothing here calls Entra, sends a notification, writes an audit
+record, or executes an onboarding step — those are later stages.
 """
 
 from __future__ import annotations
@@ -186,3 +184,220 @@ def load_holidays(path: str | Path) -> tuple[set[datetime.date], list[LoadIssue]
             holidays.add(parsed)
 
     return holidays, issues
+
+
+# ---------------------------------------------------------------------------
+# Stage 2: business decisions
+#
+# Every function below is a pure decision based only on already-loaded data
+# (a request, the group mapping, the holiday set, or the batch of requests).
+# None of them talk to Entra, send a notification, or write an audit record.
+# ---------------------------------------------------------------------------
+
+# REQUIREMENTS.md, Scope: only Regular Full-Time is in scope initially.
+IN_SCOPE_EMPLOYMENT_TYPE = "Regular Full-Time"
+
+# REQUIREMENTS.md, Corporate Card: HR provides this as Yes/No.
+CARD_SETUP_REQUIRED = "setup_required"
+CARD_NO_ACTION = "no_action"
+CARD_MANUAL_REVIEW = "manual_review"
+
+
+def is_in_scope(request: NewHireRequest) -> bool:
+    """True if this request's employment type is in scope for automation.
+
+    REQUIREMENTS.md's Scope section names "regular full-time employees" as
+    in scope, and separately excludes Contractors, interns, temporary
+    workers, and rehires. It does not name every possible Employment Type
+    value, so this checks for the one in-scope value rather than trying to
+    enumerate every excluded one.
+    """
+    return request.employment_type == IN_SCOPE_EMPLOYMENT_TYPE
+
+
+def find_duplicate_request_ids(requests: list[NewHireRequest]) -> set[str]:
+    """Return the Request IDs that duplicate an earlier request in this same
+    batch — same Employee ID and Start Date as one already seen.
+
+    REQUIREMENTS.md says a second request for the same employee and start
+    date must not start a second onboarding, but doesn't say which of two
+    such requests should be treated as the one to process. [Technical
+    recommendation] The first one encountered (in load order) is kept as
+    the primary request; any later one with the same key is flagged as a
+    duplicate here.
+
+    A request whose Start Date couldn't be parsed (None) is left out of
+    this comparison entirely — there's no reliable value to match on, and
+    guessing which request it duplicates isn't something the requirements
+    call for.
+    """
+    seen: set[tuple[str, datetime.date]] = set()
+    duplicates: set[str] = set()
+
+    for request in requests:
+        if request.start_date is None:
+            continue
+        key = (request.employee_id, request.start_date)
+        if key in seen:
+            duplicates.add(request.request_id)
+        else:
+            seen.add(key)
+
+    return duplicates
+
+
+def is_business_day(day: datetime.date, holidays: set[datetime.date]) -> bool:
+    """REQUIREMENTS.md, Scheduling: weekends and company holidays do not
+    count as business days."""
+    return day.weekday() < 5 and day not in holidays
+
+
+def compute_onboarding_date(
+    start_date: datetime.date, holidays: set[datetime.date]
+) -> datetime.date:
+    """One business day before start_date, moved earlier over any run of
+    weekend/holiday days, per REQUIREMENTS.md's Scheduling section and its
+    two worked examples (Monday start -> previous Friday; Tuesday start
+    with Monday as a holiday -> previous Friday).
+    """
+    day = start_date - datetime.timedelta(days=1)
+    while not is_business_day(day, holidays):
+        day -= datetime.timedelta(days=1)
+    return day
+
+
+def is_late(hr_ready_date: datetime.date, onboarding_date: datetime.date) -> bool:
+    """True if HR marked the employee ready after the normal onboarding day
+    had already passed (including after the start date itself), per
+    REQUIREMENTS.md's Scheduling section.
+
+    [Technical recommendation] "Already passed" is read as strictly after
+    the computed onboarding day — HR marking ready on the onboarding day
+    itself is on time, not late. REQUIREMENTS.md does not spell out this
+    exact boundary.
+    """
+    return hr_ready_date > onboarding_date
+
+
+def lookup_groups(
+    department: str, job_role: str, mapping: dict[tuple[str, str], list[str]]
+) -> list[str] | None:
+    """The required groups for a department/job role, or None if that
+    combination isn't in the mapping.
+
+    REQUIREMENTS.md, Groups: unknown/unmapped combinations go to manual
+    review — returning None (rather than an empty list or a guess) lets the
+    caller apply that rule.
+    """
+    return mapping.get((department, job_role))
+
+
+def corporate_card_decision(value: str) -> str:
+    """REQUIREMENTS.md, Corporate Card: Yes -> setup required, No -> no
+    action, missing/invalid -> manual review.
+
+    [Technical recommendation] "Missing/invalid" is read as anything other
+    than an exact "Yes" or "No" — REQUIREMENTS.md doesn't enumerate every
+    value that counts as invalid, so this doesn't try to special-case
+    values like "Pending" or "Y"; it treats them the same as blank.
+    """
+    if value == "Yes":
+        return CARD_SETUP_REQUIRED
+    if value == "No":
+        return CARD_NO_ACTION
+    return CARD_MANUAL_REVIEW
+
+
+@dataclass
+class RequestDecision:
+    """The business facts Stage 2 can determine for one request, before any
+    external-system action is attempted.
+    """
+    request_id: str
+    employee_id: str
+    in_scope: bool
+    is_duplicate: bool
+    onboarding_date: datetime.date | None
+    is_late: bool
+    required_groups: list[str] | None
+    card_action: str
+    manual_review_reasons: list[str]
+
+    @property
+    def needs_manual_review(self) -> bool:
+        return bool(self.manual_review_reasons)
+
+
+def evaluate_request(
+    request: NewHireRequest,
+    mapping: dict[tuple[str, str], list[str]],
+    holidays: set[datetime.date],
+    duplicate_request_ids: set[str],
+) -> RequestDecision:
+    """Combine the Stage 2 decisions for one request into a single result.
+
+    This only computes facts and reasons — it does not decide what to do
+    with them (skip, notify, execute a step); that's later-stage
+    orchestration.
+    """
+    reasons: list[str] = []
+
+    in_scope = is_in_scope(request)
+    if not in_scope:
+        # An out-of-scope employment type is a nonstandard case, which
+        # REQUIREMENTS.md's General Rule routes to manual review.
+        reasons.append(f"employment type '{request.employment_type}' is not in scope")
+
+    is_duplicate = request.request_id in duplicate_request_ids
+    if is_duplicate:
+        reasons.append("duplicate request: same employee and start date already submitted")
+
+    onboarding_date: datetime.date | None = None
+    late = False
+    if request.start_date is None:
+        reasons.append("start date could not be determined")
+    else:
+        onboarding_date = compute_onboarding_date(request.start_date, holidays)
+        if request.hr_ready_date is not None:
+            late = is_late(request.hr_ready_date, onboarding_date)
+
+    required_groups = lookup_groups(request.department, request.job_role, mapping)
+    if required_groups is None:
+        reasons.append(
+            f"no group mapping for department '{request.department}' "
+            f"/ job role '{request.job_role}'"
+        )
+
+    card_action = corporate_card_decision(request.corporate_card_required)
+    if card_action == CARD_MANUAL_REVIEW:
+        reasons.append(
+            f"corporate card required value is missing or invalid: "
+            f"{request.corporate_card_required!r}"
+        )
+
+    return RequestDecision(
+        request_id=request.request_id,
+        employee_id=request.employee_id,
+        in_scope=in_scope,
+        is_duplicate=is_duplicate,
+        onboarding_date=onboarding_date,
+        is_late=late,
+        required_groups=required_groups,
+        card_action=card_action,
+        manual_review_reasons=reasons,
+    )
+
+
+def evaluate_all(
+    requests: list[NewHireRequest],
+    mapping: dict[tuple[str, str], list[str]],
+    holidays: set[datetime.date],
+) -> list[RequestDecision]:
+    """Evaluate every request in a batch, sharing one duplicate-detection
+    pass across all of them (duplicate status can only be known by looking
+    at the whole batch together)."""
+    duplicate_request_ids = find_duplicate_request_ids(requests)
+    return [
+        evaluate_request(request, mapping, holidays, duplicate_request_ids)
+        for request in requests
+    ]
