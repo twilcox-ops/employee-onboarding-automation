@@ -53,6 +53,17 @@ class SimulatedEntraService:
     def find_by_upn(self, upn: str) -> EntraAccount | None:
         return self._accounts.get(upn)
 
+    def find_by_display_name(self, display_name: str) -> list[EntraAccount]:
+        """All accounts whose "first last" name matches — used to look up
+        a manager from the plain-text name on an onboarding request. A
+        list rather than one result: the caller decides what zero or
+        more-than-one matches means (Stage 8 treats either as
+        can't-uniquely-identify, per REQUIREMENTS.md)."""
+        return [
+            a for a in self._accounts.values()
+            if f"{a.first_name} {a.last_name}" == display_name
+        ]
+
     def create_account(
         self, upn: str, employee_id: str, first_name: str, last_name: str
     ) -> EntraAccount:
