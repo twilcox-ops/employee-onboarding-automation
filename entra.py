@@ -6,16 +6,18 @@ the standard UPN format `firstname.lastname@company.example`, and "If the
 generated UPN is already in use, do not invent an alternative — send the
 case to IT for manual review."
 
-There is no real Entra integration yet, so this module includes a small
-in-memory simulated directory (`SimulatedEntraService`) to develop and test
-the decision logic against. It is not a mock of the real Microsoft Graph
-API — it exists only so `evaluate_entra_account_step` has something
-concrete to create accounts in and look them up from, until the real
-integration is built.
+This module includes a small in-memory simulated directory
+(`SimulatedEntraService`) to develop and test the decision logic against.
+It is not a mock of the real Microsoft Graph API — it exists only so
+`evaluate_entra_account_step` has something concrete to create accounts in
+and look them up from. A real Microsoft Graph-backed equivalent
+(`graph_services.GraphEntraService`) satisfies the same interface and is a
+drop-in replacement; `evaluate_entra_account_step` itself needed no
+changes to work against it.
 
 Only the Entra account step lives here. Licensing, groups, corporate card,
 notifications, and the orchestration that ties every step together for a
-request (scope/duplicate gating, retries, audit logging) are later work.
+request live in their own modules.
 """
 
 from __future__ import annotations
@@ -114,13 +116,19 @@ class EntraAccountResult:
         return self.status in (ENTRA_STATUS_CREATED, ENTRA_STATUS_ALREADY_EXISTS)
 
 
-def expected_upn(first_name: str, last_name: str) -> str:
-    """REQUIREMENTS.md's standard UPN format: firstname.lastname@company.example."""
-    return f"{first_name.strip().lower()}.{last_name.strip().lower()}@company.example"
+def expected_upn(first_name: str, last_name: str, domain: str = "company.example") -> str:
+    """REQUIREMENTS.md's standard UPN format: firstname.lastname@<domain>.
+
+    Defaults to "company.example", the synthetic domain REQUIREMENTS.md
+    and the simulated tests use throughout. A real tenant has no such
+    domain (it's IANA-reserved and can never be verified), so a live
+    caller passes its own verified domain here instead.
+    """
+    return f"{first_name.strip().lower()}.{last_name.strip().lower()}@{domain}"
 
 
 def evaluate_entra_account_step(
-    request: NewHireRequest, service: SimulatedEntraService
+    request: NewHireRequest, service: SimulatedEntraService, domain: str = "company.example"
 ) -> EntraAccountResult:
     """Create or verify the Entra ID account for one request.
 
@@ -142,7 +150,7 @@ def evaluate_entra_account_step(
       sent to manual review rather than assuming it's a match or a
       collision.
     """
-    upn = expected_upn(request.first_name, request.last_name)
+    upn = expected_upn(request.first_name, request.last_name, domain)
     existing = service.find_by_upn(upn)
 
     if existing is None:

@@ -1,14 +1,14 @@
 """Stage 9 tests: rerun behavior. Each existing step function already
 re-verifies live simulated state rather than trusting the audit log (see
-rerun.py's module docstring) — these tests exercise that directly by
-calling run_onboarding_attempt twice against the *same* service instances
-and checking the second call's outcome. The audit log is only ever
-checked for the initial/rerun flag; none of these tests encode a policy
-that compares current state against what an earlier attempt recorded —
-only the current live state decides what's true, and manual review is
-used only for genuine identity/desired-state/mapping ambiguity, not
-merely because something differs from before. No real Graph, email
-delivery, or Docker is exercised here.
+process.py's module docstring) — these tests exercise that directly by
+calling process_onboarding twice (via the run_attempt helper below)
+against the *same* service instances and checking the second call's
+outcome. The audit log is only ever checked for the initial/rerun flag;
+none of these tests encode a policy that compares current state against
+what an earlier attempt recorded — only the current live state decides
+what's true, and manual review is used only for genuine identity/
+desired-state/mapping ambiguity, not merely because something differs
+from before. No real Graph, email delivery, or Docker is exercised here.
 """
 
 import datetime
@@ -16,8 +16,9 @@ import datetime
 from entra import SimulatedEntraService
 from groups import SimulatedGroupService
 from licensing import E3_SKU, SimulatedLicensingService
+from notifications import SimulatedNotifier
 from onboarding import NewHireRequest, RequestDecision
-from rerun import has_prior_attempt, run_onboarding_attempt
+from process import has_prior_attempt, process_onboarding
 
 MAPPING = {("Finance", "Financial Analyst"): ["Finance-Users", "Finance-Shared"]}
 T1 = datetime.datetime(2026, 9, 15, 9, 0, 0)
@@ -76,9 +77,15 @@ class _FailsFirstAssignService:
 
 
 def run_attempt(request, decision, entra, license_, groups, timestamp, audit_path):
-    return run_onboarding_attempt(
-        request, decision, entra, license_, groups, MAPPING, timestamp, audit_log_path=audit_path,
+    """process_onboarding also notifies (Stage 8); these tests only care
+    about the workflow result and audit record, so a fresh, discarded
+    notifier keeps that side effect out of the way without changing what's
+    being proven here."""
+    result = process_onboarding(
+        request, decision, entra, license_, groups, SimulatedNotifier(), MAPPING, timestamp,
+        audit_log_path=audit_path,
     )
+    return result.onboarding_result, result.audit_record
 
 
 # --- initial vs rerun --------------------------------------------------------

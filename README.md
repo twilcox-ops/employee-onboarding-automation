@@ -7,19 +7,20 @@ summarizes what's actually built.
 
 ## Status
 
-Phases 1–5 are implemented, tested, and committed. Nothing beyond that exists yet.
-
-| Phase | Covers | Status |
+| Phase(s) | Covers | Status |
 |---|---|---|
-| 1 | Load and validate the three source files | Done |
-| 2 | Business decisions (scope, scheduling, group mapping, corporate-card validation, duplicates) | Done |
-| 3 | Entra ID account step, against a simulated directory | Done |
-| 4 | Microsoft 365 E3 licensing, against a simulated service | Done |
-| 5 | Standard group assignment, against a simulated service | Done |
-| 6+ | Corporate card setup, manager notification, orchestration, audit logging | Not started |
+| 1–2 | Load/validate the source files, business decisions (scope, scheduling, group mapping, card validation, duplicates) | Done |
+| 3–5 | Entra account, Microsoft 365 E3 licensing, standard group assignment — each against a simulated service | Done |
+| 6 | Combines the three steps + the corporate-card decision into one per-request workflow | Done |
+| 7 | Audit evidence — one JSONL record per attempt, append-only | Done |
+| 8 | Notifications — manager completion email / IT alert (simulated) | Done |
+| 9–11 | Rerun detection, one top-level entry point, batch processing | Done |
+| 12 | Real Microsoft Graph integration — live-tested against a real developer tenant | Done |
 
-47 automated tests pass. Phases 2–5 were also spot-checked by hand against
-`REQUIREMENTS.md` and `synthetic_corpus/`.
+77 automated tests pass (all against the simulated services, by design — see
+Phase 12 below). Every phase has also been spot-checked by hand against
+`REQUIREMENTS.md` and `synthetic_corpus/`, and Phase 12 additionally against
+a real Microsoft 365 developer tenant.
 
 ## Phase 1 — Load and validate
 
@@ -46,13 +47,8 @@ Turns loaded data into a per-request decision; no external systems touched:
 
 Implements REQUIREMENTS.md's first onboarding step: create the Entra ID
 account and verify it corresponds to the intended employee, using the
-standard UPN format `firstname.lastname@company.example`.
-
-**This runs against a `SimulatedEntraService`, not real Microsoft Entra ID** —
-an in-memory dictionary keyed by UPN, standing in for a directory until a
-real integration exists. It's not a mock of the Graph API — no tenants,
-auth, or network calls — just somewhere concrete for the decision logic to
-create and look up accounts.
+standard UPN format `firstname.lastname@<domain>` (configurable; defaults to
+the synthetic `company.example`).
 
 For a given request, the step produces one of:
 
@@ -64,52 +60,97 @@ For a given request, the step produces one of:
 - **`manual_review`, ambiguous** — an account exists at that UPN with no
   employee ID on record, so it can't be confirmed whose it is.
 
-Not wired into scope/duplicate checks or any other orchestration yet — it
-only runs when called directly.
-
 ## Phase 4–5 — Licensing and group assignment
 
-Same shape as Phase 3: `licensing.py` and `groups.py` assign Microsoft 365 E3
-and the standard groups (from the Phase 2 mapping) against simulated
-in-memory services. Both recognize existing state instead of reassigning,
+Same shape as Phase 3: assign Microsoft 365 E3 and the standard groups (from
+the Phase 2 mapping). Both recognize existing state instead of reassigning,
 verify the result rather than trusting the write, and route anything
 nonstandard — an unrecognized existing license, an unmapped role, a
 membership that doesn't verify — to manual review or failure instead of
-guessing. Neither is wired into orchestration yet.
+guessing.
+
+## Phase 6–11 — Tying it together
+
+`workflow.py` runs the three steps above plus the corporate-card decision for
+one request; steps are independent — one failing doesn't block or roll back
+another, and overall onboarding is complete only if every step verifies.
+`audit.py` appends one structured record per attempt (initial or rerun,
+per-step results, overall outcome, failure reasons) and never overwrites
+prior ones. `notifications.py` sends the manager completion email once
+everything verifies and the manager is uniquely identifiable, otherwise one
+IT alert — including when onboarding itself completed but the manager
+couldn't be resolved. `process.py` determines initial-vs-rerun from the
+audit log only (never as the source of truth for what's actually true — live
+state always is) and is the one entry point for a single attempt
+(`process_onboarding`) or many (`process_batch`, isolating one request's
+unexpected failure from the rest).
+
+## Phase 12 — Real Microsoft Graph integration
+
+`graph_client.py` (app-only MSAL auth, thin REST helpers, exact-match
+identity resolution — never fuzzy, fails clearly on zero or multiple
+matches) and `graph_services.py` (`GraphEntraService`, `GraphLicensingService`,
+`GraphGroupService`) are drop-in replacements for the simulated services from
+Phases 3–5 — same method names and signatures, so none of the business-logic
+step functions needed any changes to work against a real tenant.
+
+**Live-tested**, not just unit-tested: `run_graph_demo.py` ran a real
+onboarding attempt (`ONB-1001`) against a real Microsoft 365 developer
+tenant, both an initial attempt and a rerun, through the unmodified
+`process_onboarding` path. The tenant's Entra account and group memberships
+verified successfully; the E3 license step correctly reported manual review,
+since that tenant only has an E5 Developer subscription — REQUIREMENTS.md's
+E3 requirement was deliberately left as-is rather than substituted, so this
+is a documented environment limitation, not a bug.
+
+Requires an app registration with these Graph **application** permissions
+(least-privilege, admin-consented): `User.Create`, `User.Read.All`,
+`LicenseAssignment.ReadWrite.All`, `LicenseAssignment.Read.All`,
+`GroupMember.ReadWrite.All`. Credentials come from environment variables only
+(`GRAPH_TENANT_ID`, `GRAPH_CLIENT_ID`, `GRAPH_CLIENT_SECRET`, and optionally
+`GRAPH_UPN_DOMAIN`) — never hardcoded, never read from a committed file.
 
 ## Not implemented
 
-Beyond Phases 1–5: corporate-card setup, manager lookup/notification, real
-Entra/Graph and M365 integration, rerun handling beyond each step's own
-logic, audit logging, cross-phase orchestration, Docker/deployment, and any
-HR data source beyond the static CSV/XLSX files in `synthetic_corpus/`.
-Contractors, interns, temps, rehires, and transfers are explicitly out of
-scope per REQUIREMENTS.md.
+- **Corporate-card integration** — REQUIREMENTS.md notes the mechanism is
+  still unresolved; a required card is recorded as pending, never attempted
+  or faked.
+- Any HR data source beyond the static CSV/XLSX files in `synthetic_corpus/`.
+- Audit storage location and retention beyond a local JSONL file (also
+  unresolved per REQUIREMENTS.md).
+- Anything that schedules or triggers `process_batch` automatically — it's a
+  function you call, not a running service.
+- Contractors, interns, temps, rehires, and transfers — explicitly out of
+  scope per REQUIREMENTS.md.
 
 ## Repo layout
 
 ```
-REQUIREMENTS.md    Authoritative business requirements
-onboarding.py       Phase 1 (load) + Phase 2 (decisions)
-entra.py             Phase 3 (Entra account step + simulated directory)
-licensing.py         Phase 4 (E3 licensing step + simulated service)
-groups.py            Phase 5 (group assignment step + simulated service)
-run.py               Runs Phases 1-2, prints a summary
-tests/                pytest suite
-synthetic_corpus/     Fictional HR data used for development and testing
+REQUIREMENTS.md      Authoritative business requirements
+onboarding.py          Phase 1 (load) + Phase 2 (decisions)
+entra.py                Phase 3 (Entra account step + simulated directory)
+licensing.py             Phase 4 (E3 licensing step + simulated service)
+groups.py                Phase 5 (group assignment step + simulated service)
+workflow.py               Phase 6 (combines the steps for one request)
+audit.py                   Phase 7 (audit evidence log)
+notifications.py            Phase 8 (manager email / IT alert, simulated)
+process.py                   Phases 9-11 (rerun, one/many-request entry points)
+graph_client.py                Phase 12 (Graph auth + REST + identity resolution)
+graph_services.py                Phase 12 (real Graph-backed services)
+run.py                             Runs Phases 1-2, prints a summary
+run_graph_demo.py                   Live proof against a real tenant
+tests/                                pytest suite (simulated services only)
+synthetic_corpus/                      Fictional HR data used for development and testing
 ```
 
 ## Running it
 
 ```
 pip install -r requirements.txt
-pytest                # run the test suite
+pytest                # run the test suite (simulated only, no credentials needed)
 python run.py          # Phases 1-2 summary
+python run_graph_demo.py   # live proof against a real tenant (needs Graph credentials)
 ```
-
-`run.py` doesn't exercise Phases 3–5 yet — those steps are only called
-directly (see `tests/test_entra.py`, `tests/test_licensing.py`,
-`tests/test_groups.py`).
 
 ## Data
 

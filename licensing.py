@@ -3,13 +3,16 @@
 REQUIREMENTS.md, Standard Onboarding, step 2: "Assign Microsoft 365 E3 —
 verify the license is actually assigned."
 
-No real M365/Graph integration exists yet, so this mirrors Stage 3's
-approach: a small in-memory simulated service (`SimulatedLicensingService`)
-gives `evaluate_license_step` somewhere concrete to assign and look up
-licenses. It is not a mock of the real Graph API.
+This mirrors Stage 3's approach: a small in-memory simulated service
+(`SimulatedLicensingService`) gives `evaluate_license_step` somewhere
+concrete to assign and look up licenses. It is not a mock of the real
+Graph API. A real Microsoft Graph-backed equivalent
+(`graph_services.GraphLicensingService`) satisfies the same interface and
+is a drop-in replacement; `evaluate_license_step` itself needed no changes
+to work against it.
 
 Only the E3 licensing step lives here. Group assignment, corporate card,
-notifications, audit logging, and orchestration are later work.
+notifications, audit logging, and orchestration live in their own modules.
 """
 
 from __future__ import annotations

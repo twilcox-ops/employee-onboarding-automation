@@ -9,8 +9,8 @@ responses is not required.
 This builds one structured record per attempt from the existing Stage 2
 decision and Stage 6 workflow result, reusing their fields rather than
 recomputing anything, and appends it as one JSON line to a log file —
-never overwriting prior records. Storage location/retention beyond a local
-file, real rerun execution, and IT notification are not decided/built yet.
+never overwriting prior records. Storage location and retention beyond a
+local file are not decided yet (see REQUIREMENTS.md's "Still To Decide").
 """
 
 from __future__ import annotations

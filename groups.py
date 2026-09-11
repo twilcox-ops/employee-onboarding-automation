@@ -4,15 +4,18 @@ REQUIREMENTS.md, Standard Onboarding, step 3: "Assign standard groups —
 verify membership in every required mapped group." And, Groups: "Unknown/
 unmapped combinations → manual review."
 
-No real Graph integration exists yet, so this mirrors Stages 3/4: a small
-in-memory simulated service (`SimulatedGroupService`) gives
-`evaluate_group_step` somewhere concrete to add and check memberships.
+This mirrors Stages 3/4: a small in-memory simulated service
+(`SimulatedGroupService`) gives `evaluate_group_step` somewhere concrete to
+add and check memberships. A real Microsoft Graph-backed equivalent
+(`graph_services.GraphGroupService`) satisfies the same interface and is a
+drop-in replacement; `evaluate_group_step` itself needed no changes to
+work against it.
 
 Required groups come from the existing Stage 2 mapping lookup
 (`onboarding.lookup_groups`) rather than reloading or re-deriving them here.
 
 Only the group assignment step lives here. Corporate card, notifications,
-audit logging, and orchestration are later work.
+audit logging, and orchestration live in their own modules.
 """
 
 from __future__ import annotations
@@ -77,6 +80,12 @@ def evaluate_group_step(
       the step fails, but groups that *did* verify are not rolled back —
       each group is independent, same as REQUIREMENTS.md's rule for
       required steps generally.
+    - A real integration's service call can raise for one group (e.g. a
+      transient directory-consistency issue) where the simulated service
+      never does. That's isolated per group here, in this same loop, so
+      a group already confirmed earlier in the loop stays confirmed —
+      catching this one level up (in workflow.py) couldn't tell which
+      groups had already succeeded before the failure.
     """
     required_groups = lookup_groups(request.department, request.job_role, mapping)
     if required_groups is None:
@@ -89,19 +98,25 @@ def evaluate_group_step(
 
     verified: set[str] = set()
     failed: set[str] = set()
+    exception_reasons: dict[str, str] = {}
     for group in required_groups:
-        if not service.is_member(request.employee_id, group):
-            service.add_member(request.employee_id, group)
-        if service.is_member(request.employee_id, group):
-            verified.add(group)
-        else:
+        try:
+            if not service.is_member(request.employee_id, group):
+                service.add_member(request.employee_id, group)
+            if service.is_member(request.employee_id, group):
+                verified.add(group)
+            else:
+                failed.add(group)
+        except Exception as exc:  # noqa: BLE001 - deliberately broad: isolate this one group's failure
             failed.add(group)
+            exception_reasons[group] = str(exc)
 
     status = GROUP_STATUS_FAILED if failed else GROUP_STATUS_VERIFIED
-    reason = (
-        f"membership could not be verified for group(s): {sorted(failed)}"
-        if failed else None
-    )
+    reason = None
+    if failed:
+        parts = [f"membership could not be verified for group(s): {sorted(failed)}"]
+        parts += [f"{group}: {why}" for group, why in sorted(exception_reasons.items())]
+        reason = "; ".join(parts)
 
     return GroupResult(
         request.request_id, request.employee_id, required_groups,

@@ -9,19 +9,22 @@ guess — send the case to IT for manual review." And, failure handling:
 whenever a required step failed, "IT is notified" and "the manager
 completion email is not sent."
 
-This is simulated/local, not a real email service: `SimulatedNotifier`
-just collects `Notification` objects instead of delivering anything.
-Manager lookup reuses the existing Stage 3 `SimulatedEntraService`
-directory (by display name) rather than a new directory abstraction, and
-`notify_for_attempt` reuses Stage 6's `OnboardingResult` rather than
-recomputing any step outcome.
+The email itself is always simulated/local, never a real email service:
+`SimulatedNotifier` just collects `Notification` objects instead of
+delivering anything. Manager lookup is different — it goes through
+whatever Entra directory `notify_for_attempt` is given (by display name),
+the same Stage 3 interface the Entra account step uses, so it's the real
+Microsoft Graph directory (`graph_services.GraphEntraService`) whenever
+that's what's passed in, not just the simulated one. `notify_for_attempt`
+also reuses Stage 6's `OnboardingResult` rather than recomputing any step
+outcome.
 """
 
 from __future__ import annotations
 
 from dataclasses import dataclass
 
-from entra import EntraAccount, SimulatedEntraService, expected_upn
+from entra import EntraAccount, SimulatedEntraService
 from onboarding import NewHireRequest
 from workflow import OnboardingResult
 
@@ -174,10 +177,9 @@ def notify_for_attempt(
     manager_lookup = lookup_manager(request.manager, entra_service)
 
     if manager_lookup.status == MANAGER_LOOKUP_FOUND:
-        account = manager_lookup.account
         notification = Notification(
             NOTIFICATION_MANAGER_COMPLETE, request.request_id, request.employee_id,
-            expected_upn(account.first_name, account.last_name),
+            manager_lookup.account.upn,
             f"Onboarding complete: {request.first_name} {request.last_name}",
             _summarize_steps(workflow_result),
         )

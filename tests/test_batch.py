@@ -7,12 +7,12 @@ concurrency is exercised here.
 
 import datetime
 
-from batch import process_batch
 from entra import SimulatedEntraService
 from groups import SimulatedGroupService
 from licensing import SimulatedLicensingService
 from notifications import SimulatedNotifier
 from onboarding import NewHireRequest, RequestDecision
+from process import process_batch
 
 MAPPING = {("Finance", "Financial Analyst"): ["Finance-Users", "Finance-Shared"]}
 T1 = datetime.datetime(2026, 9, 15, 9, 0, 0)
