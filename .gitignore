@@ -10,3 +10,6 @@ SAVE_POINT.md
 
 # Runtime output from run_graph_demo.py, not source
 graph_demo_audit_log.jsonl
+
+# Runtime audit output (audit.DEFAULT_AUDIT_LOG_PATH), not source
+audit_log.jsonl

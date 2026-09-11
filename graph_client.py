@@ -110,8 +110,22 @@ class GraphClient:
         result = self._get_app().acquire_token_for_client(scopes=GRAPH_SCOPE)
         if "access_token" not in result:
             description = result.get("error_description", result.get("error", "unknown error"))
-            raise GraphError(f"failed to acquire a Graph access token: {description}")
+            raise GraphError(f"failed to acquire a Graph access token: {self._redact(str(description))}")
         return result["access_token"]
+
+    def _redact(self, text: str, *extra_secrets: str) -> str:
+        """Defense in depth: strip any of our own known secret values out
+        of a string before it's used in an exception message. Nothing in
+        this client currently puts the client secret or a bearer token
+        into an error message (MSAL/Graph error responses describe the
+        problem, they don't echo back what was sent), but exception text
+        is exactly what ends up persisted in audit records and IT
+        notifications, so a secret must never be able to reach it even if
+        that assumption is ever wrong."""
+        for secret in (self._client_secret, *extra_secrets):
+            if secret and secret in text:
+                text = text.replace(secret, "[REDACTED]")
+        return text
 
     # --- thin REST helpers ------------------------------------------------
 
@@ -122,8 +136,9 @@ class GraphClient:
         JSON body, or None for a 204 No Content response."""
         url = path if path.startswith("http") else GRAPH_API_BASE + path
         data = json.dumps(body).encode("utf-8") if body is not None else None
+        token = self._get_token()
         request = urllib.request.Request(url, data=data, method=method)
-        request.add_header("Authorization", f"Bearer {self._get_token()}")
+        request.add_header("Authorization", f"Bearer {token}")
         if data is not None:
             request.add_header("Content-Type", "application/json")
 
@@ -138,6 +153,7 @@ class GraphClient:
                 message = json.loads(message)["error"]["message"]
             except (json.JSONDecodeError, KeyError, TypeError):
                 pass  # fall back to the raw body if it isn't the usual Graph error shape
+            message = self._redact(message, token)
             raise GraphError(
                 f"Graph {method} {path} failed ({exc.code}): {message}", status_code=exc.code
             ) from exc
