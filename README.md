@@ -17,10 +17,9 @@ summarizes what's actually built.
 | 9–11 | Rerun detection, one top-level entry point, batch processing | Done |
 | 12 | Real Microsoft Graph integration — live-tested against a real developer tenant | Done |
 
-77 automated tests pass (all against the simulated services, by design — see
-Phase 12 below). Every phase has also been spot-checked by hand against
-`REQUIREMENTS.md` and `synthetic_corpus/`, and Phase 12 additionally against
-a real Microsoft 365 developer tenant.
+77 automated tests pass against the simulated services. Every phase has also
+been spot-checked against REQUIREMENTS.md and synthetic_corpus/, with Phase
+12 additionally validated against a real Microsoft 365 developer tenant.
 
 ## Phase 1 — Load and validate
 
