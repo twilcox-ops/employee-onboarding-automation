@@ -70,28 +70,23 @@ guessing.
 
 ## Phase 6–11 — Tying it together
 
-`workflow.py` runs the three steps above plus the corporate-card decision for
-one request; steps are independent — one failing doesn't block or roll back
-another, and overall onboarding is complete only if every step verifies.
-`audit.py` appends one structured record per attempt (initial or rerun,
-per-step results, overall outcome, failure reasons) and never overwrites
-prior ones. `notifications.py` sends the manager completion email once
-everything verifies and the manager is uniquely identifiable, otherwise one
-IT alert — including when onboarding itself completed but the manager
-couldn't be resolved. `process.py` determines initial-vs-rerun from the
-audit log only (never as the source of truth for what's actually true — live
-state always is) and is the one entry point for a single attempt
-(`process_onboarding`) or many (`process_batch`, isolating one request's
-unexpected failure from the rest).
+- **Workflow**: Runs the onboarding steps independently so one failure
+  doesn't block or roll back successful work.
+- **Audit**: Appends a structured record for every initial attempt and
+  rerun without overwriting previous evidence.
+- **Notifications**: Sends the simulated manager completion notification
+  when onboarding succeeds, or an IT alert when intervention is required.
+- **Processing**: Handles initial attempts, reruns, and batch processing
+  while isolating unexpected failures between requests.
 
 ## Phase 12 — Real Microsoft Graph integration
 
-`graph_client.py` (app-only MSAL auth, thin REST helpers, exact-match
-identity resolution — never fuzzy, fails clearly on zero or multiple
-matches) and `graph_services.py` (`GraphEntraService`, `GraphLicensingService`,
-`GraphGroupService`) are drop-in replacements for the simulated services from
-Phases 3–5 — same method names and signatures, so none of the business-logic
-step functions needed any changes to work against a real tenant.
+`graph_client.py` handles app-only Microsoft Graph authentication, REST
+calls, and exact-match identity resolution. `graph_services.py` provides
+Graph-backed Entra ID, licensing, and group services using the same
+interfaces as the simulated services from Phases 3–5. This allows the
+existing business logic to run against a real tenant without being
+rewritten.
 
 **Live-tested**, not just unit-tested: `run_graph_demo.py` ran a real
 onboarding attempt (`ONB-1001`) against a real Microsoft 365 developer
@@ -109,7 +104,7 @@ Requires an app registration with these Graph **application** permissions
 (`GRAPH_TENANT_ID`, `GRAPH_CLIENT_ID`, `GRAPH_CLIENT_SECRET`, and optionally
 `GRAPH_UPN_DOMAIN`) — never hardcoded, never read from a committed file.
 
-## Not implemented
+## Current limitations and scope
 
 - **Corporate-card integration** — REQUIREMENTS.md notes the mechanism is
   still unresolved; a required card is recorded as pending, never attempted
